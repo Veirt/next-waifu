@@ -68,8 +68,8 @@ const Home: NextPage = () => {
                     {"Loading..." &&
                         images.map((image) => {
                             return (
-                                <AspectRatio maxW="400px" ratio={1}>
-                                    <Image key={image} src={image} objectPosition="top" />
+                                <AspectRatio key={image} maxW="400px" ratio={1}>
+                                    <Image src={image} alt="" objectPosition="top" />
                                 </AspectRatio>
                             );
                         })}
