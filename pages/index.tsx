@@ -4,6 +4,7 @@ import type { NextPage } from "next";
 import { useEffect, useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import type { Categories, Category, Images } from "../@types";
+import Loading from "../components/Loading";
 
 // TODO: split all files to individual components
 const Home: NextPage = () => {
@@ -90,18 +91,17 @@ const Home: NextPage = () => {
                     dataLength={images.length}
                     next={getMoreImages}
                     hasMore={true}
-                    loader={<h3> Loading...</h3>}
+                    loader={<Loading />}
                     endMessage={<h4>Nothing more to show</h4>}
                 >
                     <SimpleGrid minChildWidth="300px" spacing="40px">
-                        {"Loading..." &&
-                            images.map((image) => {
-                                return (
-                                    <AspectRatio key={image} maxW="400px" ratio={1}>
-                                        <Image src={image} alt="" objectPosition="top" fallback={<Skeleton />} />
-                                    </AspectRatio>
-                                );
-                            })}
+                        {images.map((image) => {
+                            return (
+                                <AspectRatio key={image} maxW="400px" ratio={1}>
+                                    <Image src={image} alt="" objectPosition="top" fallback={<Skeleton />} />
+                                </AspectRatio>
+                            );
+                        })}
                     </SimpleGrid>
                 </InfiniteScroll>
             </Container>
