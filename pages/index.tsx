@@ -3,15 +3,17 @@ import axios from "axios";
 import type { NextPage } from "next";
 import { useEffect, useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
+import type { Categories, Category, Images } from "../@types";
 
 // TODO: split all files to individual components
 const Home: NextPage = () => {
-    const [images, setImages] = useState<string[]>([]);
-    const [categories, setCategories] = useState([]);
-    const [currentCategory, setCurrentCategory] = useState("waifu");
     const API_ENDPOINT = "https://api.waifu.pics";
 
-    const handleClick = (category: string) => {
+    const [images, setImages] = useState<Images>([]);
+    const [categories, setCategories] = useState<Categories>([]);
+    const [currentCategory, setCurrentCategory] = useState<Category>("waifu");
+
+    const handleClick = (category: Category) => {
         setCurrentCategory(category);
     };
 
@@ -32,7 +34,7 @@ const Home: NextPage = () => {
             excludes: [],
         });
 
-        const incomingImages: string[] = res.data.files;
+        const incomingImages: Images = res.data.files;
 
         const filteredIncomingImages = incomingImages.filter((image) => !images.includes(image));
 
