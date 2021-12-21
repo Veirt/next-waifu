@@ -2,10 +2,11 @@ import { AspectRatio, Button, Container, Flex, Image, SimpleGrid, Skeleton } fro
 import axios from "axios";
 import type { NextPage } from "next";
 import { useEffect, useState } from "react";
+import InfiniteScroll from "react-infinite-scroll-component";
 
 // TODO: split all files to individual components
 const Home: NextPage = () => {
-    const [images, setImages] = useState([]);
+    const [images, setImages] = useState<string[]>([]);
     const [categories, setCategories] = useState([]);
     const [currentCategory, setCurrentCategory] = useState("waifu");
     const API_ENDPOINT = "https://api.waifu.pics";
@@ -25,8 +26,20 @@ const Home: NextPage = () => {
         getCategories();
     }, []);
 
+    // TODO: handle error when response code is not 200
+    async function getMoreImages() {
+        const res = await axios.post(`${API_ENDPOINT}/many/sfw/${currentCategory}`, {
+            excludes: [],
+        });
+
+        const incomingImages: string[] = res.data.files;
+
+        const filteredIncomingImages = incomingImages.filter((image) => !images.includes(image));
+
+        setImages([...images, ...filteredIncomingImages]);
+    }
+
     useEffect(() => {
-        // TODO: handle error when response code is not 200
         async function getImages() {
             const res = await axios.post(`${API_ENDPOINT}/many/sfw/${currentCategory}`, {
                 excludes: [],
@@ -64,16 +77,24 @@ const Home: NextPage = () => {
             </Container>
 
             <Container my="10" maxW="container.xl">
-                <SimpleGrid minChildWidth="300px" spacing="40px">
-                    {"Loading..." &&
-                        images.map((image) => {
-                            return (
-                                <AspectRatio key={image} maxW="400px" ratio={1}>
-                                    <Image src={image} alt="" objectPosition="top" />
-                                </AspectRatio>
-                            );
-                        })}
-                </SimpleGrid>
+                <InfiniteScroll
+                    dataLength={images.length}
+                    next={getMoreImages}
+                    hasMore={true}
+                    loader={<h3> Loading...</h3>}
+                    endMessage={<h4>Nothing more to show</h4>}
+                >
+                    <SimpleGrid minChildWidth="300px" spacing="40px">
+                        {"Loading..." &&
+                            images.map((image) => {
+                                return (
+                                    <AspectRatio key={image} maxW="400px" ratio={1}>
+                                        <Image src={image} alt="" objectPosition="top" />
+                                    </AspectRatio>
+                                );
+                            })}
+                    </SimpleGrid>
+                </InfiniteScroll>
             </Container>
         </>
     );
