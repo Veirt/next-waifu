@@ -13,10 +13,6 @@ const Home: NextPage = () => {
     const [categories, setCategories] = useState<Categories>([]);
     const [currentCategory, setCurrentCategory] = useState<Category>("waifu");
 
-    const handleClick = (category: Category) => {
-        setCurrentCategory(category);
-    };
-
     // get categories
     useEffect(() => {
         // TODO: handle error when response code is not 200
@@ -27,19 +23,6 @@ const Home: NextPage = () => {
 
         getCategories();
     }, []);
-
-    // TODO: handle error when response code is not 200
-    async function getMoreImages() {
-        const res = await axios.post(`${API_ENDPOINT}/many/sfw/${currentCategory}`, {
-            excludes: [],
-        });
-
-        const incomingImages: Images = res.data.files;
-
-        const filteredIncomingImages = incomingImages.filter((image) => !images.includes(image));
-
-        setImages([...images, ...filteredIncomingImages]);
-    }
 
     useEffect(() => {
         async function getImages() {
@@ -52,6 +35,30 @@ const Home: NextPage = () => {
 
         getImages();
     }, [currentCategory]);
+
+    const handleClick = (category: Category) => {
+        getMoreImagesController.abort();
+        setCurrentCategory(category);
+    };
+
+    const getMoreImagesController = new AbortController();
+
+    // TODO: handle error when response code is not 200
+    async function getMoreImages() {
+        const res = await axios.post(
+            `${API_ENDPOINT}/many/sfw/${currentCategory}`,
+            {
+                excludes: [],
+            },
+            { signal: getMoreImagesController.signal }
+        );
+
+        const incomingImages: Images = res.data.files;
+
+        const filteredIncomingImages = incomingImages.filter((image) => !images.includes(image));
+
+        setImages([...images, ...filteredIncomingImages]);
+    }
 
     return (
         <>
