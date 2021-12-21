@@ -5,21 +5,23 @@ import { useEffect, useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import type { Categories, Category, Images } from "../@types";
 import Loading from "../components/Loading";
+import { API_ENDPOINT } from "../lib/constants";
 
-// TODO: split all files to individual components
 const Home: NextPage = () => {
-    const API_ENDPOINT = "https://api.waifu.pics";
-
     const [images, setImages] = useState<Images>([]);
     const [categories, setCategories] = useState<Categories>([]);
     const [currentCategory, setCurrentCategory] = useState<Category>("waifu");
 
     // get categories
     useEffect(() => {
-        // TODO: handle error when response code is not 200
         async function getCategories() {
-            const res = await axios.get(`${API_ENDPOINT}/endpoints`);
-            setCategories(res.data.sfw);
+            try {
+                const res = await axios.get(`${API_ENDPOINT}/endpoints`);
+                setCategories(res.data.sfw);
+            } catch (err) {
+                alert("Something went wrong when fetching categories.");
+                console.error(err);
+            }
         }
 
         getCategories();
@@ -27,38 +29,40 @@ const Home: NextPage = () => {
 
     useEffect(() => {
         async function getImages() {
-            const res = await axios.post(`${API_ENDPOINT}/many/sfw/${currentCategory}`, {
-                excludes: [],
-            });
+            try {
+                const res = await axios.post(`${API_ENDPOINT}/many/sfw/${currentCategory}`, {
+                    excludes: [],
+                });
 
-            setImages(res.data.files);
+                setImages(res.data.files);
+            } catch (err) {
+                alert("Something went wrong when fetching images.");
+                console.error(err);
+            }
         }
 
         getImages();
     }, [currentCategory]);
 
     const handleClick = (category: Category) => {
-        getMoreImagesController.abort();
         setCurrentCategory(category);
     };
 
-    const getMoreImagesController = new AbortController();
-
-    // TODO: handle error when response code is not 200
     async function getMoreImages() {
-        const res = await axios.post(
-            `${API_ENDPOINT}/many/sfw/${currentCategory}`,
-            {
+        try {
+            const res = await axios.post(`${API_ENDPOINT}/many/sfw/${currentCategory}`, {
                 excludes: [],
-            },
-            { signal: getMoreImagesController.signal }
-        );
+            });
 
-        const incomingImages: Images = res.data.files;
+            const incomingImages: Images = res.data.files;
 
-        const filteredIncomingImages = incomingImages.filter((image) => !images.includes(image));
+            const filteredIncomingImages = incomingImages.filter((image) => !images.includes(image));
 
-        setImages([...images, ...filteredIncomingImages]);
+            setImages([...images, ...filteredIncomingImages]);
+        } catch (err) {
+            alert("Something went wrong when fetching more images.");
+            console.error(err);
+        }
     }
 
     return (
@@ -87,13 +91,7 @@ const Home: NextPage = () => {
             </Container>
 
             <Container my="10" maxW="container.xl">
-                <InfiniteScroll
-                    dataLength={images.length}
-                    next={getMoreImages}
-                    hasMore={true}
-                    loader={<Loading />}
-                    endMessage={<h4>Nothing more to show</h4>}
-                >
+                <InfiniteScroll dataLength={images.length} next={getMoreImages} hasMore={true} loader={<Loading />}>
                     <SimpleGrid minChildWidth="300px" spacing="40px">
                         {images.map((image) => {
                             return (
