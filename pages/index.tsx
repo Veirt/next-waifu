@@ -89,7 +89,7 @@ const Home: NextPage = () => {
                             images.map((image) => {
                                 return (
                                     <AspectRatio key={image} maxW="400px" ratio={1}>
-                                        <Image src={image} alt="" objectPosition="top" />
+                                        <Image src={image} alt="" objectPosition="top" fallback={<Skeleton />} />
                                     </AspectRatio>
                                 );
                             })}
