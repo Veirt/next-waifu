@@ -78,6 +78,7 @@ const Home: NextPage = () => {
                             return (
                                 <Button
                                     key={category}
+                                    borderRadius={0}
                                     colorScheme="teal"
                                     variant={category === currentCategory ? "solid" : "outline"}
                                     onClick={() => handleClick(category)}
